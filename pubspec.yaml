@@ -1,6 +1,6 @@
 name: ripple_backdrop_animate_route
-description: A ripple animation with backdrop of route.
-version: 0.1.0
+description: A ripple animation with backdrop of route. This will create a transparent page with a ripple backdrop animation to animate the widgets. You can place any widgets inside can customize the effect.
+version: 0.1.1
 author: AlexV525 <github@alexv525.com>
 homepage: https://github.com/fluttercandies/ripple_backdrop_animate_route
 

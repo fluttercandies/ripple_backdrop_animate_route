@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-
 class RippleBackdropAnimatePage extends StatefulWidget {
   const RippleBackdropAnimatePage({
     Key key,
@@ -48,10 +47,12 @@ class RippleBackdropAnimatePage extends StatefulWidget {
   final double bottomButtonRotateDegree;
 
   @override
-  _RippleBackdropAnimatePageState createState() => _RippleBackdropAnimatePageState();
+  _RippleBackdropAnimatePageState createState() =>
+      _RippleBackdropAnimatePageState();
 }
 
-class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage> with TickerProviderStateMixin {
+class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
+    with TickerProviderStateMixin {
   /// Boolean to prevent duplicate pop.
   bool _popping = false;
 
@@ -70,7 +71,8 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage> w
   @override
   void initState() {
     _animateDuration = widget.duration;
-    SchedulerBinding.instance.addPostFrameCallback((_) => backDropFilterAnimate(context, true));
+    SchedulerBinding.instance
+        .addPostFrameCallback((_) => backDropFilterAnimate(context, true));
     super.initState();
   }
 
@@ -80,6 +82,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage> w
     _popButtonController?.dispose();
     super.dispose();
   }
+
   double pythagoreanTheorem(double short, double long) {
     return math.sqrt(math.pow(short, 2) + math.pow(long, 2));
   }
@@ -89,7 +92,8 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage> w
       _popButtonController?.stop();
       _popButtonOpacityController?.stop();
     }
-    final double rotateDegree = widget.bottomButtonRotateDegree * (math.pi / 180) * 3;
+    final double rotateDegree =
+        widget.bottomButtonRotateDegree * (math.pi / 180) * 3;
 
     _popButtonOpacityController = _popButtonController = AnimationController(
       duration: Duration(milliseconds: _animateDuration),
@@ -124,7 +128,8 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage> w
   Future backDropFilterAnimate(BuildContext context, bool forward) async {
     final MediaQueryData m = MediaQuery.of(context);
     final Size s = m.size;
-    final double r = pythagoreanTheorem(s.width, s.height * 2 + m.padding.top) / 2;
+    final double r =
+        pythagoreanTheorem(s.width, s.height * 2 + m.padding.top) / 2;
     if (!forward) _backDropFilterController?.stop();
     popButtonAnimate(context, forward);
 
@@ -177,7 +182,8 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage> w
   Widget wrapper(context, {Widget child}) {
     final MediaQueryData m = MediaQuery.of(context);
     final Size s = m.size;
-    final double r = pythagoreanTheorem(s.width, s.height * 2 + m.padding.top) / 2;
+    final double r =
+        pythagoreanTheorem(s.width, s.height * 2 + m.padding.top) / 2;
     final double topOverflow = r - s.height;
     final double horizontalOverflow = r - s.width;
 

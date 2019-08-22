@@ -21,7 +21,8 @@ class TransparentRoute extends PageRoute<void> {
   Duration get transitionDuration => Duration.zero;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
     final result = builder(context);
     return Semantics(
       scopesRoute: true,
