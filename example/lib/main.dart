@@ -12,13 +12,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({
+    Key key,
+    this.title,
+  }) : super(key: key);
+
   final String title;
 
   @override
@@ -35,34 +39,32 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Click button to see the page.',
-            ),
+          children: const <Widget>[
+            Text('Click button to see the page.'),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(TransparentRoute(
-            builder: (context) => RippleBackdropAnimatePage(
+            builder: (BuildContext context) => RippleBackdropAnimatePage(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Text("This is ripple backdrop animate page."),
+                children: const <Widget>[
+                  Text('This is ripple backdrop animate page.'),
                 ],
               ),
               childFade: true,
               duration: 300,
               blurRadius: 20.0,
-              bottomButton: Icon(Icons.visibility),
+              bottomButton: const Icon(Icons.visibility),
               bottomHeight: 60.0,
               bottomButtonRotate: false,
             ),
           ));
         },
         tooltip: 'Push to page',
-        child: Icon(Icons.arrow_forward),
+        child: const Icon(Icons.arrow_forward),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );

@@ -1,3 +1,7 @@
+///
+/// [Author] Alex (https://github.com/AlexV525)
+/// [Date] 2019-08-22 17:49
+///
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -57,29 +61,30 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
   bool _popping = false;
 
   /// Animation.
-  int _animateDuration;
-  double _backdropFilterSize = 0.0;
-  double _popButtonOpacity = 0.0;
-  double _popButtonRotateAngle = 0.0;
-  Animation<double> _backDropFilterAnimation;
-  AnimationController _backDropFilterController;
-  Animation<double> _popButtonAnimation;
-  AnimationController _popButtonController;
-  Animation<double> _popButtonOpacityAnimation;
-  AnimationController _popButtonOpacityController;
+  int get _animateDuration => widget.duration;
+
+  AnimationController _controller;
+  Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _animateDuration = widget.duration;
-    SchedulerBinding.instance
-        .addPostFrameCallback((_) => backDropFilterAnimate(context, true));
+    _controller = AnimationController(
+      duration: Duration(milliseconds: _animateDuration),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+    SchedulerBinding.instance.addPostFrameCallback(
+      (_) => backDropFilterAnimate(context, true),
+    );
   }
 
   @override
   void dispose() {
-    _backDropFilterController?.dispose();
-    _popButtonController?.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -87,98 +92,45 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     return math.sqrt(math.pow(short, 2) + math.pow(long, 2));
   }
 
-  void popButtonAnimate(BuildContext context, bool forward) {
-    if (!forward) {
-      _popButtonController?.stop();
-      _popButtonOpacityController?.stop();
-    }
-    final double rotateDegree =
-        widget.bottomButtonRotateDegree * (math.pi / 180) * 3;
-
-    _popButtonOpacityController = _popButtonController = AnimationController(
-      duration: Duration(milliseconds: _animateDuration),
-      vsync: this,
-    );
-    final CurvedAnimation _popButtonCurve = CurvedAnimation(
-      parent: _popButtonController,
-      curve: Curves.easeInOut,
-    );
-    _popButtonAnimation = Tween<double>(
-      begin: forward ? 0.0 : _popButtonRotateAngle,
-      end: forward ? rotateDegree : 0.0,
-    ).animate(_popButtonCurve)
-      ..addListener(() {
-        setState(() {
-          _popButtonRotateAngle = _popButtonAnimation.value;
-        });
-      });
-    _popButtonOpacityAnimation = Tween<double>(
-      begin: forward ? 0.0 : _popButtonOpacity,
-      end: forward ? 1.0 : 0.0,
-    ).animate(_popButtonCurve)
-      ..addListener(() {
-        setState(() {
-          _popButtonOpacity = _popButtonOpacityAnimation.value;
-        });
-      });
-    _popButtonController.forward();
-    _popButtonOpacityController.forward();
-  }
-
   Future<void> backDropFilterAnimate(BuildContext context, bool forward) async {
-    final MediaQueryData m = MediaQuery.of(context);
-    final Size s = m.size;
-    final double r =
-        pythagoreanTheorem(s.width, s.height * 2 + m.padding.top) / 2;
     if (!forward) {
-      _backDropFilterController?.stop();
+      _controller?.stop();
     }
-    popButtonAnimate(context, forward);
-
-    _backDropFilterController = AnimationController(
-      duration: Duration(milliseconds: _animateDuration),
-      vsync: this,
-    );
-    final CurvedAnimation _backDropFilterCurve = CurvedAnimation(
-      parent: _backDropFilterController,
-      curve: forward ? Curves.easeInOut : Curves.easeIn,
-    );
-    _backDropFilterAnimation = Tween<double>(
-      begin: forward ? 0.0 : _backdropFilterSize,
-      end: forward ? r * 2 : 0.0,
-    ).animate(_backDropFilterCurve)
-      ..addListener(() {
-        setState(() {
-          _backdropFilterSize = _backDropFilterAnimation.value;
-        });
-      });
-    await _backDropFilterController.forward();
+    if (forward) {
+      await _controller.forward();
+    } else {
+      await _controller.reverse();
+    }
   }
 
   Widget popButton() {
-    Widget button =
-        widget.bottomButton ?? const Icon(Icons.add, color: Colors.grey);
-    if (widget.bottomButtonRotate) {
-      button = Transform.rotate(
-        angle: _popButtonRotateAngle,
-        child: button,
-      );
-    }
-    button = Opacity(
-      opacity: _popButtonOpacity,
-      child: SizedBox(
-        width: widget.bottomHeight,
-        height: widget.bottomHeight,
-        child: Center(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            child: button,
-            onTap: willPop,
-          ),
+    Widget button = SizedBox(
+      width: widget.bottomHeight,
+      height: widget.bottomHeight,
+      child: Center(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child:
+              widget.bottomButton ?? const Icon(Icons.add, color: Colors.grey),
+          onTap: willPop,
         ),
       ),
     );
-
+    if (widget.bottomButtonRotate) {
+      final double rotateDegree =
+          widget.bottomButtonRotateDegree * (math.pi / 180) * 3;
+      button = Transform.rotate(
+        angle: _animation.value * rotateDegree,
+        child: button,
+      );
+    }
+    button = AnimatedBuilder(
+      animation: _animation,
+      builder: (_, Widget child) {
+        return Opacity(opacity: _animation.value, child: child);
+      },
+      child: button,
+    );
     return button;
   }
 
@@ -202,19 +154,25 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
             behavior: HitTestBehavior.opaque,
             onTap: willPop,
             child: Center(
-              child: SizedBox(
-                width: _backdropFilterSize,
-                height: _backdropFilterSize,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(r * 2),
-                  child: BackdropFilter(
-                    filter: ui.ImageFilter.blur(
-                      sigmaX: widget.blurRadius,
-                      sigmaY: widget.blurRadius,
+              child: AnimatedBuilder(
+                animation: _animation,
+                builder: (_, __) {
+                  final double _size = _animation.value * r * 2;
+                  return SizedBox(
+                    width: _size,
+                    height: _size,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(r * 2),
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(
+                          sigmaX: widget.blurRadius,
+                          sigmaY: widget.blurRadius,
+                        ),
+                        child: const Center(child: Text(' ')),
+                      ),
                     ),
-                    child: const Center(child: Text(' ')),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),
@@ -233,10 +191,17 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Expanded(
-                  child: Opacity(
-                    opacity: widget.childFade ? _popButtonOpacity : 1.0,
-                    child: child,
-                  ),
+                  child: () {
+                    if (widget.childFade) {
+                      return AnimatedBuilder(
+                        animation: _animation,
+                        builder: (_, Widget c) =>
+                            Opacity(opacity: _animation.value, child: c),
+                        child: child,
+                      );
+                    }
+                    return Opacity(opacity: 1.0, child: child);
+                  }(),
                 ),
                 popButton(),
               ],

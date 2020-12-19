@@ -1,3 +1,7 @@
+///
+/// [Author] Alex (https://github.com/AlexV525)
+/// [Date] 2019-08-22 17:49
+///
 import 'package:flutter/material.dart';
 
 class TransparentRoute extends PageRoute<void> {
