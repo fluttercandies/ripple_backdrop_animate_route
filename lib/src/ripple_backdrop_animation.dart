@@ -10,8 +10,8 @@ import 'package:flutter/scheduler.dart';
 
 class RippleBackdropAnimatePage extends StatefulWidget {
   const RippleBackdropAnimatePage({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
     this.childFade = false,
     this.duration = 300,
     this.blurRadius = 15.0,
@@ -24,30 +24,33 @@ class RippleBackdropAnimatePage extends StatefulWidget {
   /// Child for page.
   final Widget child;
 
-  /// When enabled, [child] will fade in when animation is going and fade out when popping.
-  /// [false] is by default.
+  /// When enabled, [child] will fade in and out with the animation.
+  ///
+  /// Defaults to `false`.
   final bool childFade;
 
-  /// Animation's duration,
-  /// including [Navigator.push], [Navigator.pop].
+  /// Animation's duration, including [Navigator.push] and [Navigator.pop].
   final int duration;
 
-  /// Blur radius for [BackdropFilter].
+  /// Blur radius for the [BackdropFilter].
   final double blurRadius;
 
-  /// [Widget] for bottom of the page.
-  final Widget bottomButton;
+  /// The [Widget] for bottom of the page.
+  final Widget? bottomButton;
 
   /// The height which [bottomButton] will occupy.
-  /// [kBottomNavigationBarHeight] is by default.
+  ///
+  /// Defaults to [kBottomNavigationBarHeight].
   final double bottomHeight;
 
-  /// When enabled, [bottomButton] will rotate when to animation is going.
-  /// [true] is by default.
+  /// When enabled, [bottomButton] will rotate with the animation.
+  ///
+  /// Defaults to `true`.
   final bool bottomButtonRotate;
 
-  /// The degree which [bottomButton] will rotate.
-  /// 45.0 is by default.
+  /// The degree that [bottomButton] will rotate.
+  ///
+  /// Defaults to `45.0`.
   final double bottomButtonRotateDegree;
 
   @override
@@ -63,28 +66,29 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
   /// Animation.
   int get _animateDuration => widget.duration;
 
-  AnimationController _controller;
-  Animation<double> _animation;
+  late final AnimationController _controller = AnimationController(
+    duration: Duration(milliseconds: _animateDuration),
+    vsync: this,
+  );
+  late final Animation<double> _animation = Tween<double>(
+    begin: 0.0,
+    end: 1.0,
+  ).animate(CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  ));
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: Duration(milliseconds: _animateDuration),
-      vsync: this,
-    );
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
-    SchedulerBinding.instance.addPostFrameCallback(
+    SchedulerBinding.instance?.addPostFrameCallback(
       (_) => backDropFilterAnimate(context, true),
     );
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -94,13 +98,24 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
 
   Future<void> backDropFilterAnimate(BuildContext context, bool forward) async {
     if (!forward) {
-      _controller?.stop();
+      _controller.stop();
     }
     if (forward) {
       await _controller.forward();
     } else {
       await _controller.reverse();
     }
+  }
+
+  Future<bool> willPop() async {
+    await backDropFilterAnimate(context, false);
+    if (!_popping) {
+      _popping = true;
+      await Future<void>.delayed(Duration(milliseconds: _animateDuration), () {
+        Navigator.of(context).pop();
+      });
+    }
+    return false;
   }
 
   Widget popButton() {
@@ -126,7 +141,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     }
     button = AnimatedBuilder(
       animation: _animation,
-      builder: (_, Widget child) {
+      builder: (_, Widget? child) {
         return Opacity(opacity: _animation.value, child: child);
       },
       child: button,
@@ -134,7 +149,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     return button;
   }
 
-  Widget wrapper(BuildContext context, {Widget child}) {
+  Widget wrapper(BuildContext context, {required Widget child}) {
     final MediaQueryData m = MediaQuery.of(context);
     final Size s = m.size;
     final double r =
@@ -195,7 +210,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
                     if (widget.childFade) {
                       return AnimatedBuilder(
                         animation: _animation,
-                        builder: (_, Widget c) =>
+                        builder: (_, Widget? c) =>
                             Opacity(opacity: _animation.value, child: c),
                         child: child,
                       );
@@ -210,17 +225,6 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
         ),
       ],
     );
-  }
-
-  Future<bool> willPop() async {
-    await backDropFilterAnimate(context, false);
-    if (!_popping) {
-      _popping = true;
-      await Future<void>.delayed(Duration(milliseconds: _animateDuration), () {
-        Navigator.of(context).pop();
-      });
-    }
-    return null;
   }
 
   @override
