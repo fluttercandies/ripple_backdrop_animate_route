@@ -12,12 +12,15 @@ A ripple animation with backdrop of route.
 Screenshot:
 
 ![](https://user-gold-cdn.xitu.io/2019/8/21/16cb4d58e3458fd7)
+
 ## Getting Started
+
 ### Example Usage
+
 ```dart
 import 'package:ripple_backdrop_animate_route/ripple_backdrop_animate_route.dart';
 
-/.../
+///...
 
 Navigator.of(context).push(TransparentRoute(
   builder: (context) => RippleBackdropAnimatePage(
@@ -36,8 +39,9 @@ Navigator.of(context).push(TransparentRoute(
   ),
 ));
 
-/.../
+///...
 ```
+
 ### Parameters
 | parameter | description | default |
 | --------- | ----------- | ------- |

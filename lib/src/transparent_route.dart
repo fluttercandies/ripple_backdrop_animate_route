@@ -11,19 +11,26 @@ class TransparentRoute extends PageRoute<void> {
 
   @override
   bool get opaque => false;
+
   @override
   Color get barrierColor => null;
+
   @override
   String get barrierLabel => null;
+
   @override
   bool get maintainState => true;
+
   @override
   Duration get transitionDuration => Duration.zero;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
-    final result = builder(context);
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    final Widget result = builder(context);
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,

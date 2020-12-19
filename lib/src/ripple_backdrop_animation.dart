@@ -70,10 +70,10 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
 
   @override
   void initState() {
+    super.initState();
     _animateDuration = widget.duration;
     SchedulerBinding.instance
         .addPostFrameCallback((_) => backDropFilterAnimate(context, true));
-    super.initState();
   }
 
   @override
@@ -87,7 +87,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     return math.sqrt(math.pow(short, 2) + math.pow(long, 2));
   }
 
-  void popButtonAnimate(context, bool forward) {
+  void popButtonAnimate(BuildContext context, bool forward) {
     if (!forward) {
       _popButtonController?.stop();
       _popButtonOpacityController?.stop();
@@ -99,11 +99,11 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
       duration: Duration(milliseconds: _animateDuration),
       vsync: this,
     );
-    Animation _popButtonCurve = CurvedAnimation(
+    final CurvedAnimation _popButtonCurve = CurvedAnimation(
       parent: _popButtonController,
       curve: Curves.easeInOut,
     );
-    _popButtonAnimation = Tween(
+    _popButtonAnimation = Tween<double>(
       begin: forward ? 0.0 : _popButtonRotateAngle,
       end: forward ? rotateDegree : 0.0,
     ).animate(_popButtonCurve)
@@ -112,7 +112,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
           _popButtonRotateAngle = _popButtonAnimation.value;
         });
       });
-    _popButtonOpacityAnimation = Tween(
+    _popButtonOpacityAnimation = Tween<double>(
       begin: forward ? 0.0 : _popButtonOpacity,
       end: forward ? 1.0 : 0.0,
     ).animate(_popButtonCurve)
@@ -125,23 +125,25 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     _popButtonOpacityController.forward();
   }
 
-  Future backDropFilterAnimate(BuildContext context, bool forward) async {
+  Future<void> backDropFilterAnimate(BuildContext context, bool forward) async {
     final MediaQueryData m = MediaQuery.of(context);
     final Size s = m.size;
     final double r =
         pythagoreanTheorem(s.width, s.height * 2 + m.padding.top) / 2;
-    if (!forward) _backDropFilterController?.stop();
+    if (!forward) {
+      _backDropFilterController?.stop();
+    }
     popButtonAnimate(context, forward);
 
     _backDropFilterController = AnimationController(
       duration: Duration(milliseconds: _animateDuration),
       vsync: this,
     );
-    Animation _backDropFilterCurve = CurvedAnimation(
+    final CurvedAnimation _backDropFilterCurve = CurvedAnimation(
       parent: _backDropFilterController,
       curve: forward ? Curves.easeInOut : Curves.easeIn,
     );
-    _backDropFilterAnimation = Tween(
+    _backDropFilterAnimation = Tween<double>(
       begin: forward ? 0.0 : _backdropFilterSize,
       end: forward ? r * 2 : 0.0,
     ).animate(_backDropFilterCurve)
@@ -154,7 +156,8 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
   }
 
   Widget popButton() {
-    Widget button = widget.bottomButton ?? Icon(Icons.add, color: Colors.grey);
+    Widget button =
+        widget.bottomButton ?? const Icon(Icons.add, color: Colors.grey);
     if (widget.bottomButtonRotate) {
       button = Transform.rotate(
         angle: _popButtonRotateAngle,
@@ -179,7 +182,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     return button;
   }
 
-  Widget wrapper(context, {Widget child}) {
+  Widget wrapper(BuildContext context, {Widget child}) {
     final MediaQueryData m = MediaQuery.of(context);
     final Size s = m.size;
     final double r =
@@ -209,7 +212,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
                       sigmaX: widget.blurRadius,
                       sigmaY: widget.blurRadius,
                     ),
-                    child: Text(" "),
+                    child: const Center(child: Text(' ')),
                   ),
                 ),
               ),
@@ -248,7 +251,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     await backDropFilterAnimate(context, false);
     if (!_popping) {
       _popping = true;
-      await Future.delayed(Duration(milliseconds: _animateDuration), () {
+      await Future<void>.delayed(Duration(milliseconds: _animateDuration), () {
         Navigator.of(context).pop();
       });
     }
