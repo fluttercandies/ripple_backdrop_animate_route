@@ -158,7 +158,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     final double horizontalOverflow = r - s.width;
 
     return Stack(
-      overflow: Overflow.visible,
+      clipBehavior: Clip.none,
       children: <Widget>[
         Positioned(
           left: -horizontalOverflow,
@@ -183,7 +183,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
                           sigmaX: widget.blurRadius,
                           sigmaY: widget.blurRadius,
                         ),
-                        child: const Center(child: Text(' ')),
+                        child: const Center(child: Text('　')),
                       ),
                     ),
                   );
