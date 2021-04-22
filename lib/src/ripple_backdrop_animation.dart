@@ -8,6 +8,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'transparent_route.dart';
+
 class RippleBackdropAnimatePage extends StatefulWidget {
   const RippleBackdropAnimatePage({
     Key? key,
@@ -20,6 +22,30 @@ class RippleBackdropAnimatePage extends StatefulWidget {
     this.bottomButtonRotate = true,
     this.bottomButtonRotateDegree = 45.0,
   }) : super(key: key);
+
+  static Future<void> show({
+    required BuildContext context,
+    required Widget child,
+    bool childFade = false,
+    int duration = 300,
+    double blurRadius = 15.0,
+    Widget? bottomButton,
+    double bottomHeight = kBottomNavigationBarHeight,
+    bool bottomButtonRotate = true,
+    double bottomButtonRotateDegree = 45.0,
+  }) {
+    return Navigator.of(context).push(TransparentRoute(
+      builder: (BuildContext context) => RippleBackdropAnimatePage(
+        child: child,
+        childFade: childFade,
+        duration: duration,
+        blurRadius: blurRadius,
+        bottomButton: bottomButton,
+        bottomHeight: bottomHeight,
+        bottomButtonRotate: bottomButtonRotate,
+      ),
+    ));
+  }
 
   /// Child for page.
   final Widget child;
@@ -82,7 +108,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
   void initState() {
     super.initState();
     SchedulerBinding.instance?.addPostFrameCallback(
-      (_) => backDropFilterAnimate(context, true),
+      (_) => _backDropFilterAnimate(context, true),
     );
   }
 
@@ -96,7 +122,8 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     return math.sqrt(math.pow(short, 2) + math.pow(long, 2));
   }
 
-  Future<void> backDropFilterAnimate(BuildContext context, bool forward) async {
+  Future<void> _backDropFilterAnimate(
+      BuildContext context, bool forward) async {
     if (!forward) {
       _controller.stop();
     }
@@ -107,8 +134,8 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     }
   }
 
-  Future<bool> willPop() async {
-    await backDropFilterAnimate(context, false);
+  Future<bool> _willPop() async {
+    await _backDropFilterAnimate(context, false);
     if (!_popping) {
       _popping = true;
       await Future<void>.delayed(Duration(milliseconds: _animateDuration), () {
@@ -118,17 +145,55 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     return false;
   }
 
-  Widget popButton() {
-    Widget button = SizedBox(
+  Widget _backdrop(
+    BuildContext context,
+    double topOverflow,
+    double horizontalOverflow,
+    double r,
+  ) {
+    return Positioned(
+      left: -horizontalOverflow,
+      right: -horizontalOverflow,
+      top: -topOverflow,
+      bottom: -r,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _willPop,
+        child: Center(
+          child: AnimatedBuilder(
+            animation: _animation,
+            builder: (_, __) {
+              final double _size = _animation.value * r * 2;
+              return SizedBox(
+                width: _size,
+                height: _size,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(r * 2),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(
+                      sigmaX: widget.blurRadius,
+                      sigmaY: widget.blurRadius,
+                    ),
+                    child: const Center(child: Text('　')),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget get _popButton {
+    Widget button = Container(
       width: widget.bottomHeight,
       height: widget.bottomHeight,
-      child: Center(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          child:
-              widget.bottomButton ?? const Icon(Icons.add, color: Colors.grey),
-          onTap: willPop,
-        ),
+      alignment: Alignment.center,
+      child: GestureDetector(
+        onTap: _willPop,
+        behavior: HitTestBehavior.opaque,
+        child: widget.bottomButton ?? const Icon(Icons.add, color: Colors.grey),
       ),
     );
     if (widget.bottomButtonRotate) {
@@ -160,38 +225,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
-        Positioned(
-          left: -horizontalOverflow,
-          right: -horizontalOverflow,
-          top: -topOverflow,
-          bottom: -r,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: willPop,
-            child: Center(
-              child: AnimatedBuilder(
-                animation: _animation,
-                builder: (_, __) {
-                  final double _size = _animation.value * r * 2;
-                  return SizedBox(
-                    width: _size,
-                    height: _size,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(r * 2),
-                      child: BackdropFilter(
-                        filter: ui.ImageFilter.blur(
-                          sigmaX: widget.blurRadius,
-                          sigmaY: widget.blurRadius,
-                        ),
-                        child: const Center(child: Text('　')),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
+        _backdrop(context, topOverflow, horizontalOverflow, r),
         Align(
           alignment: Alignment.topCenter,
           child: Container(
@@ -218,7 +252,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
                     return Opacity(opacity: 1.0, child: child);
                   }(),
                 ),
-                popButton(),
+                _popButton,
               ],
             ),
           ),
@@ -232,11 +266,8 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: WillPopScope(
-        onWillPop: willPop,
-        child: wrapper(
-          context,
-          child: widget.child,
-        ),
+        onWillPop: _willPop,
+        child: wrapper(context, child: widget.child),
       ),
     );
   }
