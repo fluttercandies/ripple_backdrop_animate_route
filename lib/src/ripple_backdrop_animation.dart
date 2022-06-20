@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'transparent_route.dart';
 
@@ -110,7 +109,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance?.addPostFrameCallback(
+    _ambiguate(WidgetsBinding.instance)?.addPostFrameCallback(
       (_) => _backDropFilterAnimate(context, true),
     );
   }
@@ -282,3 +281,5 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     );
   }
 }
+
+T? _ambiguate<T>(T value) => value;
