@@ -1,12 +1,12 @@
-///
-/// [Author] Alex (https://github.com/AlexV525)
-/// [Date] 2019-08-22 17:49
-///
+//
+// [Author] Alex (https://github.com/AlexV525)
+// [Date] 2019-08-22 17:49
+//
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'transparent_route.dart';
 
@@ -34,17 +34,19 @@ class RippleBackdropAnimatePage extends StatefulWidget {
     bool bottomButtonRotate = true,
     double bottomButtonRotateDegree = 45.0,
   }) {
-    return Navigator.of(context).push(TransparentRoute(
-      builder: (BuildContext context) => RippleBackdropAnimatePage(
-        child: child,
-        childFade: childFade,
-        duration: duration,
-        blurRadius: blurRadius,
-        bottomButton: bottomButton,
-        bottomHeight: bottomHeight,
-        bottomButtonRotate: bottomButtonRotate,
+    return Navigator.of(context).push(
+      TransparentRoute(
+        builder: (BuildContext context) => RippleBackdropAnimatePage(
+          child: child,
+          childFade: childFade,
+          duration: duration,
+          blurRadius: blurRadius,
+          bottomButton: bottomButton,
+          bottomHeight: bottomHeight,
+          bottomButtonRotate: bottomButtonRotate,
+        ),
       ),
-    ));
+    );
   }
 
   /// Child for page.
@@ -107,7 +109,7 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance?.addPostFrameCallback(
+    _ambiguate(WidgetsBinding.instance)?.addPostFrameCallback(
       (_) => _backDropFilterAnimate(context, true),
     );
   }
@@ -123,7 +125,9 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
   }
 
   Future<void> _backDropFilterAnimate(
-      BuildContext context, bool forward) async {
+    BuildContext context,
+    bool forward,
+  ) async {
     if (!forward) {
       _controller.stop();
     }
@@ -138,9 +142,14 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     await _backDropFilterAnimate(context, false);
     if (!_popping) {
       _popping = true;
-      await Future<void>.delayed(Duration(milliseconds: _animateDuration), () {
-        Navigator.of(context).pop();
-      });
+      await Future<void>.delayed(
+        Duration(milliseconds: _animateDuration),
+        () {
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+      );
     }
     return false;
   }
@@ -272,3 +281,5 @@ class _RippleBackdropAnimatePageState extends State<RippleBackdropAnimatePage>
     );
   }
 }
+
+T? _ambiguate<T>(T value) => value;
