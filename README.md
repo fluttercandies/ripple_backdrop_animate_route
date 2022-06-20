@@ -11,7 +11,7 @@ A ripple animation with backdrop of route.
 
 Screenshot:
 
-![](https://user-gold-cdn.xitu.io/2019/8/21/16cb4d58e3458fd7)
+![](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2019/8/21/16cb4d58e3458fd7~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ## Getting Started
 
@@ -22,34 +22,31 @@ import 'package:ripple_backdrop_animate_route/ripple_backdrop_animate_route.dart
 
 ///...
 
-Navigator.of(context).push(TransparentRoute(
-  builder: (context) => RippleBackdropAnimatePage(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: <Widget>[
-        Text("This is ripple backdrop animate page."),
-      ],
-    ),
-    childFade: true,
-    duration: 300,
-    blurRadius: 20.0,
-    bottomButton: Icon(Icons.visibility),
-    bottomHeight: 60.0,
-    bottomButtonRotate: false,
+RippleBackdropAnimatePage.show(
+  context: context,
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: <Widget>[
+      Text('This is ripple backdrop animate page.'),
+    ],
   ),
-));
-
-///...
+  childFade: true,
+  duration: 300,
+  blurRadius: 20,
+  bottomButton: Icon(Icons.visibility),
+  bottomHeight: 60,
+  bottomButtonRotate: false,
+);
 ```
 
 ### Parameters
-| parameter | description | default |
-| --------- | ----------- | ------- |
-| child | Child for page. | - |
-| childFade | When enabled, [child] will fade in when animation is going and fade out when popping. | false |
-| duration | Animation's duration, including [Navigator.push], [Navigator.pop]. | 300 |
-| blurRadius | Blur radius for [BackdropFilter]. | 20.0 |
-| bottomButton | [Widget] for bottom of the page. | - |
-| bottomHeight | The height which [bottomButton] will occupy. | kBottomNavigationBarHeight |
-| bottomButtonRotate | When enabled, [bottomButton] will rotate when to animation is going. | true |
-| bottomButtonRotateDegree | The degree which [bottomButton] will rotate. | 45.0 |
+| Name                     | Description                                                                           | Default                      |
+|--------------------------|---------------------------------------------------------------------------------------|------------------------------|
+| child                    | Child for page.                                                                       | -                            |
+| childFade                | When enabled, [child] will fade in when animation is going and fade out when popping. | false                        |
+| duration                 | Animation's duration, including [Navigator.push], [Navigator.pop].                    | 300                          |
+| blurRadius               | Blur radius for [BackdropFilter].                                                     | 20.0                         |
+| bottomButton             | [Widget] for bottom of the page.                                                      | -                            |
+| bottomHeight             | The height which [bottomButton] will occupy.                                          | `kBottomNavigationBarHeight` |
+| bottomButtonRotate       | When enabled, [bottomButton] will rotate when to animation is going.                  | true                         |
+| bottomButtonRotateDegree | The degree which [bottomButton] will rotate.                                          | 45.0                         |
